@@ -8,8 +8,8 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-@jakarta.persistence.Entity
-@Table(name = "event")
+@Entity
+@Table(name = "events")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
