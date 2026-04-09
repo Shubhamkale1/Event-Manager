@@ -2,6 +2,7 @@ package com.shubham.event_manager.controller;
 
 import com.shubham.event_manager.dto.EventDTO;
 import com.shubham.event_manager.service.EventService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,13 +27,13 @@ public class EventController {
     }
 
     @PostMapping
-    public ResponseEntity<EventDTO> createEvent(@RequestBody EventDTO eventDTO) {
+    public ResponseEntity<EventDTO> createEvent( @Valid @RequestBody EventDTO eventDTO) {
         return new ResponseEntity<>(eventService.createEvent(eventDTO),HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<EventDTO> updateEvent(@PathVariable Long id,
-                                                @RequestBody EventDTO eventDTO) {
+                                                  @Valid @RequestBody EventDTO eventDTO) {
         return ResponseEntity.ok(eventService.updateEvent(id, eventDTO));
     }
 
