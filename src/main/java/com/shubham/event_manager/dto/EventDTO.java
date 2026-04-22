@@ -1,6 +1,11 @@
 package com.shubham.event_manager.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -23,6 +28,8 @@ public class EventDTO {
 
     private String description;
 
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     @NotNull(message = "Event date cannot be empty")
     @Future(message = "Event date cannot be in the past")
     private LocalDateTime eventDate;
@@ -32,7 +39,8 @@ public class EventDTO {
     @Min(value = 1, message = "Capacity cannot be less than 1")
     private Integer capacity;
 
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime createdAt;
 
 }
