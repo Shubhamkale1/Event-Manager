@@ -11,8 +11,8 @@ This is **Phase 1** of a 5-phase project designed to learn the entire Spring eco
 | Phase | Focus | Status |
 |-------|-------|--------|
 | Phase 1 | Core REST API — Spring Boot, JPA, H2, Lombok | ✅ Complete |
-| Phase 2 | Persistence & Logic — MySQL, Flyway, Validation, MapStruct, JUnit | 🔜 Next |
-| Phase 3 | Speed & Search — Redis, Elasticsearch, Swagger | 🔜 Planned |
+| Phase 2 | Persistence & Logic — MySQL, Flyway, Validation, MapStruct, JUnit | ✅ Complete |
+| Phase 3 | Speed & Search — Redis, Elasticsearch, Swagger | ✅ Complete |
 | Phase 4 | Security — Spring Security, OAuth2, Spring AI | 🔜 Planned |
 | Phase 5 | Cloud & Microservices — Docker, Kafka, GitHub Actions | 🔜 Planned |
 
