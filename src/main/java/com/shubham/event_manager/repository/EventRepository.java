@@ -1,4 +1,4 @@
-package com.shubham.event_manager.repository.jpa;
+package com.shubham.event_manager.repository;
 
 import com.shubham.event_manager.entity.Event;
 import org.springframework.data.jpa.repository.JpaRepository;
