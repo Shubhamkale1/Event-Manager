@@ -1,7 +1,7 @@
 package com.shubham.event_manager.config;
 
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.anthropic.AnthropicChatModel;
+import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 public class AiConfig {
 
     @Bean
-    public ChatClient chatClient(AnthropicChatModel chatModel) {
+    public ChatClient chatClient(OpenAiChatModel chatModel) {
         return ChatClient.builder(chatModel).build();
     }
 }
