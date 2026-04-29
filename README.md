@@ -4,6 +4,12 @@ A RESTful Event Management API built with Spring Boot 3.x as part of a progressi
 
 ---
 
+## API Documentation
+
+- [https://github.com/Shubhamkale1/Event-Manager/wiki](https://github.com/Shubhamkale1/Event-Manager/wiki)
+
+***
+
 ## About This Project
 
 This is **Phase 1** of a 5-phase project designed to learn the entire Spring ecosystem by building a real application. Each phase adds new technologies on top of a working foundation.
