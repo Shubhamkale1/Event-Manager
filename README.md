@@ -72,23 +72,6 @@ The application starts on `http://localhost:8080`
 
 ---
 
-### H2 Database Console
-
-While the app is running, visit the H2 web console to inspect your data live:
-
-```
-URL:      http://localhost:8080/h2-console
-JDBC URL: jdbc:h2:mem:eventsdb
-Username: sa
-Password: (leave empty)
-```
-
-Run `SELECT * FROM events` to see all your data in real time.
-
-> Note: H2 is an in-memory database. All data is lost when the application stops. This is replaced with MySQL in Phase 2.
-
----
-
 
 ## Contributing
 
