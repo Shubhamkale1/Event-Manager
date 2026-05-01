@@ -1,0 +1,19 @@
+# Compiled files
+*.class
+
+# Maven build
+target/
+
+# IntelliJ
+.idea/
+*.iml
+
+# OS
+desktop.ini
+
+# Logs
+*.log
+
+# Env
+application-dev.properties
+application-prod.properties

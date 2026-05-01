@@ -6,6 +6,7 @@ import com.shubham.event_manager.dto.RegisterRequest;
 import com.shubham.event_manager.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -34,5 +35,20 @@ public class AuthController {
     public ResponseEntity<AuthResponse> login(
             @Valid @RequestBody LoginRequest request) {
         return ResponseEntity.ok(authService.login(request));
+    }
+
+    @GetMapping("/oauth2/google/url")
+    @Operation(
+            summary = "Get Google OAuth2 login URL",
+            description = "Redirect your frontend to this URL to trigger Google login"
+    )
+    public ResponseEntity<String> getGoogleLoginUrl(
+            HttpServletRequest request) {
+        String baseUrl = request.getScheme()
+                + "://" + request.getServerName()
+                + ":" + request.getServerPort();
+        return ResponseEntity.ok(
+                baseUrl + "/oauth2/authorization/google"
+        );
     }
 }

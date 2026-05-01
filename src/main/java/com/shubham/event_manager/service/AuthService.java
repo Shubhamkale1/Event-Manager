@@ -5,6 +5,6 @@ import com.shubham.event_manager.dto.LoginRequest;
 import com.shubham.event_manager.dto.RegisterRequest;
 
 public interface AuthService {
-    public AuthResponse register(RegisterRequest request);
-    public AuthResponse login(LoginRequest request);
+     AuthResponse register(RegisterRequest request);
+     AuthResponse login(LoginRequest request);
 }
