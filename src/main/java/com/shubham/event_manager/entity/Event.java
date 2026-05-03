@@ -42,5 +42,9 @@ public class Event {
         createdAt = LocalDateTime.now();
     }
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "venue_id")
+    private Venue venue;
+
 
 }
