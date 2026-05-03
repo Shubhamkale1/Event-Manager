@@ -11,9 +11,3 @@ CREATE TABLE venues (
     created_at  DATETIME        DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id)
 );
-
-ALTER TABLE event
-ADD COLUMN venue_id BIGINT,
-ADD CONSTRAINT fk_event_venue
-    FOREIGN KEY (venue_id) REFERENCES venues(id)
-    ON DELETE SET NULL;
