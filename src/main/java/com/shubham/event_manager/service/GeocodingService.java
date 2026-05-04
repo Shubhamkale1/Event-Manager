@@ -8,9 +8,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -27,36 +27,32 @@ public class GeocodingService {
     public Optional<BigDecimal[]> getCoordinates(
             String address, String city, String state) {
 
-        // If no API key configured, skip geocoding
         if (apiKey == null || apiKey.isBlank()) {
-            log.warn("Geocoding API key not configured. " +
-                    "Add app.geocoding.api-key to properties. " +
-                    "Saving venue without coordinates.");
+            log.warn("Geocoding API key not configured.");
             return Optional.empty();
         }
 
         try {
-            String query = address + ", "
-                    + city + ", "
-                    + (state != null ? state + ", " : "")
-                    + "India";
+            // Rate limit protection
+            Thread.sleep(1000);
 
-            String url = UriComponentsBuilder
-                    .fromHttpUrl(
-                            "https://geocode.maps.co/search")
-                    .queryParam("q", query)
-                    .queryParam("api_key", apiKey)
-                    .toUriString();
+            // Use + encoding exactly like browser URL
+            String query = (address + " "
+                    + city + " India")
+                    .replace(" ", "+");
 
-            log.info("Calling geocoding API for: {}",
-                    query);
+            // Build URL manually to preserve + encoding
+            String url = "https://geocode.maps.co/search"
+                    + "?q=" + query
+                    + "&api_key=" + apiKey;
+
+            log.info("Geocoding URL: {}", url);
 
             HttpHeaders headers = new HttpHeaders();
             headers.set("User-Agent",
                     "EventManagementApp/1.0");
             headers.setAccept(
-                    java.util.List.of(
-                            MediaType.APPLICATION_JSON));
+                    List.of(MediaType.APPLICATION_JSON));
 
             HttpEntity<String> entity =
                     new HttpEntity<>(headers);
@@ -69,6 +65,9 @@ public class GeocodingService {
                             String.class
                     );
 
+            log.info("Raw response: {}",
+                    response.getBody());
+
             JsonNode root = objectMapper
                     .readTree(response.getBody());
 
@@ -79,19 +78,20 @@ public class GeocodingService {
                 BigDecimal lon = new BigDecimal(
                         first.get("lon").asText());
                 log.info(
-                        "Geocoded successfully: {} → {}, {}",
-                        query, lat, lon);
+                        "Geocoded successfully → " +
+                                "lat={}, lon={}", lat, lon);
                 return Optional.of(
                         new BigDecimal[]{lat, lon});
-            } else {
-                log.warn(
-                        "No results found for: {}", query);
             }
 
+            log.warn("Empty results for: {}", url);
+
+        } catch (InterruptedException ie) {
+            Thread.currentThread().interrupt();
+            log.error("Geocoding interrupted");
         } catch (Exception e) {
-            log.error(
-                    "Geocoding failed for '{}': {}",
-                    address, e.getMessage());
+            log.error("Geocoding error: {}",
+                    e.getMessage());
         }
 
         return Optional.empty();
