@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 public class VenueMapper {
 
     public VenueDTO toDTO(Venue venue) {
-        if (venue == null) return null;
         VenueDTO dto = new VenueDTO();
         dto.setId(venue.getId());
         dto.setName(venue.getName());
@@ -17,9 +16,27 @@ public class VenueMapper {
         dto.setState(venue.getState());
         dto.setPincode(venue.getPincode());
         dto.setCapacity(venue.getCapacity());
-        dto.setLatitude(venue.getLatitude());
-        dto.setLongitude(venue.getLongitude());
         dto.setCreatedAt(venue.getCreatedAt());
+
+        // Generate Google Maps link if coordinates exist
+        // User clicks this and sees the venue on a map
+        if (venue.getLatitude() != null
+                && venue.getLongitude() != null) {
+            dto.setMapUrl(
+                    "https://www.google.com/maps?q="
+                            + venue.getLatitude()
+                            + ","
+                            + venue.getLongitude()
+            );
+        } else {
+            dto.setMapUrl(
+                    "https://www.google.com/maps/search/"
+                            + venue.getName().replace(" ", "+")
+                            + "+"
+                            + venue.getCity().replace(" ", "+")
+            );
+        }
+
         return dto;
     }
 
