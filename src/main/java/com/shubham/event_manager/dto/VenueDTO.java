@@ -1,9 +1,9 @@
 package com.shubham.event_manager.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class VenueDTO {
 
     private Long id;
@@ -28,10 +29,16 @@ public class VenueDTO {
     private String pincode;
     private Integer capacity;
 
-    // Optional — user can provide manually
-    // If not provided, system tries to geocode automatically
+    // WRITE_ONLY — client can send, never returned back
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private BigDecimal latitude;
+
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private BigDecimal longitude;
+
+    // This replaces showing raw coordinates
+    // Generated from coordinates — shown to user as clickable map link
+    private String mapUrl;
 
     private LocalDateTime createdAt;
 }
