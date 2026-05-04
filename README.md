@@ -6,6 +6,11 @@ A **production-ready RESTful Event Management API** built with Spring Boot 3.x, 
 
 ---
 
+### **API Documentation**
+[GitHub Wiki](https://github.com/Shubhamkale1/Event-Manager/wiki)
+
+---
+
 ## 📋 Table of Contents
 
 - [✨ Features](#-features)
@@ -17,11 +22,6 @@ A **production-ready RESTful Event Management API** built with Spring Boot 3.x, 
 - [🛠️ Development](#️-development)
 - [📝 Contributing](#-contributing)
 - [📄 License](#-license)
-
----
-
-### **API Documentation**
-[GitHub Wiki](https://github.com/Shubhamkale1/Event-Manager/wiki)
 
 ---
 
