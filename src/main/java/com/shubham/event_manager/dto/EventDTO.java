@@ -43,4 +43,8 @@ public class EventDTO {
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime createdAt;
 
+
+    private Long venueId;
+    private VenueDTO venue;
+
 }
