@@ -10,7 +10,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -77,18 +76,18 @@ public class User implements UserDetails {
         return true;
     }
 
-    @OneToMany(
-            mappedBy = "owner",
-            fetch = FetchType.LAZY
-    )
-    private List<Organization> ownedOrganizations
-            = new ArrayList<>();
+    @Column(length = 500)
+    private String bio;
 
-    @OneToMany(
-            mappedBy = "user",
-            fetch = FetchType.LAZY
-    )
-    private List<OrganizationFollower> following
-            = new ArrayList<>();
+    private String phone;
+
+    private String city;
+
+    private LocalDateTime updatedAt;
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 
 }
