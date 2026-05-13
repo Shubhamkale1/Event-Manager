@@ -76,4 +76,18 @@ public class User implements UserDetails {
         return true;
     }
 
+    @Column(length = 500)
+    private String bio;
+
+    private String phone;
+
+    private String city;
+
+    private LocalDateTime updatedAt;
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
+
 }
