@@ -1,7 +1,6 @@
 package com.shubham.event_manager.config;
 
 
-import com.shubham.event_manager.entity.User;
 import com.shubham.event_manager.security.CustomUserDetailsService;
 import com.shubham.event_manager.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
@@ -38,12 +37,28 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer ::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/swagger-ui/**",
+                        .requestMatchers(
+                                "/api/auth/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/swagger-ui/index.html",
                                 "/api-docs/**",
-                                "/swagger-ui.html").permitAll()
-                        .requestMatchers(HttpMethod.GET,
-                                "/api/events/**").hasRole("ADMIN")
+                                "/v3/api-docs/**",
+                                "/login/oauth2/**",
+                                "/oauth2/**"
+                        ).permitAll()
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/events/**",
+                                "/api/venues/**",
+                                "/api/organizations/**"
+                        ).permitAll()
+                        .requestMatchers(
+                                "/api/admin/**"
+                        ).hasRole("ADMIN")
+                        .requestMatchers(
+                                "/api/users/**"    // ← all user endpoints protected
+                        ).authenticated()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
