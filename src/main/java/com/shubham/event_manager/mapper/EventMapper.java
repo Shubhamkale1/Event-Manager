@@ -9,9 +9,12 @@ public interface EventMapper {
 
     EventDTO toDTO(Event event);
 
+
     Event toEntity(EventDTO dto);
 
     // 🔄 update existing entity
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateEntityFromDTO(EventDTO dto, @MappingTarget Event event);
+
+
 }

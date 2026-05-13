@@ -4,10 +4,12 @@ package com.shubham.event_manager.service;
 import com.shubham.event_manager.document.EventDocument;
 import com.shubham.event_manager.dto.EventDTO;
 import com.shubham.event_manager.entity.Event;
+import com.shubham.event_manager.entity.Venue;
 import com.shubham.event_manager.exception.ResourceNotFoundException;
 import com.shubham.event_manager.mapper.EventMapper;
 import com.shubham.event_manager.repository.EventRepository;
 import com.shubham.event_manager.repository.EventSearchRepository;
+import com.shubham.event_manager.repository.VenueRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
@@ -26,6 +28,7 @@ public class EventServiceImpl implements EventService {
     private final EventSearchRepository eventSearchRepository;
     private final EventMapper           eventMapper;
     private final EmailService          emailService;
+    private final VenueRepository       venueRepository;
 
     @Override
     @Cacheable(value = "events")
@@ -51,6 +54,23 @@ public class EventServiceImpl implements EventService {
     @CacheEvict(value = {"events", "event"}, allEntries = true)
     public EventDTO createEvent(EventDTO eventDTO, String userEmail) {
         Event event = eventMapper.toEntity(eventDTO);
+        if (eventDTO.getVenueId() != null) {
+            Venue venue = venueRepository.findById(
+                            eventDTO.getVenueId())
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Venue not found: " + eventDTO.getVenueId()));
+
+            // Check venue capacity vs event capacity
+            if (venue.getCapacity() != null
+                    && eventDTO.getCapacity() != null
+                    && eventDTO.getCapacity() > venue.getCapacity()) {
+                throw new IllegalArgumentException(
+                        "Event capacity " + eventDTO.getCapacity()
+                                + " exceeds venue capacity "
+                                + venue.getCapacity());
+            }
+            event.setVenue(venue);
+        }
         Event saved = eventRepository.save(event);
 
         EventDocument document = mapToDocument(saved);
@@ -70,6 +90,23 @@ public class EventServiceImpl implements EventService {
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Event not found with id: " + id));
         eventMapper.updateEntityFromDTO(eventDTO, existing);
+        if (eventDTO.getVenueId() != null) {
+            Venue venue = venueRepository.findById(
+                            eventDTO.getVenueId())
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Venue not found: " + eventDTO.getVenueId()));
+
+            if (venue.getCapacity() != null
+                    && eventDTO.getCapacity() != null
+                    && eventDTO.getCapacity() > venue.getCapacity()) {
+                throw new IllegalArgumentException(
+                        "Event capacity " + eventDTO.getCapacity()
+                                + " exceeds venue capacity "
+                                + venue.getCapacity());
+            }
+
+            existing.setVenue(venue);
+        }
         Event saved = eventRepository.save(existing);
 
         eventSearchRepository.save(mapToDocument(saved));
@@ -104,4 +141,5 @@ public class EventServiceImpl implements EventService {
                 event.getCapacity()
         );
     }
+
 }

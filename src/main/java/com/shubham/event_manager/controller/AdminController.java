@@ -8,10 +8,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/admin")
@@ -51,6 +48,12 @@ public class AdminController {
         return ResponseEntity.ok(email + "has been demoted to USER");
     }
 
+    @GetMapping("/users")
+    @Operation(
+            summary = "Get all users",
+            description = "View all registered users",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
     public ResponseEntity<?> getAllUsers(){
         return ResponseEntity.ok(userRepository.findAll()
                 .stream()
