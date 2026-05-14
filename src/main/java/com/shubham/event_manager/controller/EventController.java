@@ -72,4 +72,16 @@ public class EventController {
             @RequestParam String q) {
         return ResponseEntity.ok(eventService.searchEvents(q));
     }
+
+    @GetMapping("/search/category/{category}")
+    @Operation(
+            summary = "Get events by category",
+            description = "Filter events by exact category name"
+    )
+    public ResponseEntity<List<EventDocument>>
+    getByCategory(
+            @PathVariable String category) {
+        return ResponseEntity.ok(
+                eventService.getEventsByCategory(category));
+    }
 }
