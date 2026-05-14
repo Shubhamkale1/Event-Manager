@@ -19,4 +19,7 @@ public interface EventService {
     void deleteEvent(Long id);
 
     List<EventDocument> searchEvents(String query);
+
+    List<EventDocument> getEventsByCategory(
+            String category);
 }
