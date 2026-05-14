@@ -51,8 +51,21 @@ public class SecurityConfig {
                                 HttpMethod.GET,
                                 "/api/events/**",
                                 "/api/venues/**",
-                                "/api/organizations/**"
+                                "/api/organizations/**",
+                                "/api/categories/**"
                         ).permitAll()
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/categories/**"
+                        ).hasRole("ADMIN")
+                        .requestMatchers(
+                                HttpMethod.PUT,
+                                "/api/categories/**"
+                        ).hasRole("ADMIN")
+                        .requestMatchers(
+                                HttpMethod.DELETE,
+                                "/api/categories/**"
+                        ).hasRole("ADMIN")
                         .requestMatchers(
                                 "/api/admin/**"
                         ).hasRole("ADMIN")
