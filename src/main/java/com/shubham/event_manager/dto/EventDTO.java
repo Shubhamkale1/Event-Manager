@@ -15,6 +15,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -46,5 +47,9 @@ public class EventDTO {
 
     private Long venueId;
     private VenueDTO venue;
+
+
+    private List<Long> categoryIds;
+    private List<String> categoryNames;
 
 }
