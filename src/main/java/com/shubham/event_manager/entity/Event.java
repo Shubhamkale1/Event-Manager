@@ -8,6 +8,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "events")
@@ -50,6 +52,17 @@ public class Event {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "organization_id")
     private Organization organization;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "event_categories",
+            joinColumns = @JoinColumn(
+                    name = "event_id"),
+            inverseJoinColumns = @JoinColumn(
+                    name = "category_id")
+    )
+    private List<Category> categories
+            = new ArrayList<>();
 
 
 }
