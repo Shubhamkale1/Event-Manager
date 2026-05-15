@@ -64,5 +64,25 @@ public class Event {
     private List<Category> categories
             = new ArrayList<>();
 
+    @Column(nullable = false)
+    private Integer registrationsCount = 0;
+
+    @OneToMany(
+            mappedBy = "event",
+            fetch = FetchType.LAZY
+    )
+    private List<Registration> registrations
+            = new ArrayList<>();
+
+    public boolean isFull() {
+        if (capacity == null) return false;
+        return registrationsCount >= capacity;
+    }
+
+    public int getSpotsRemaining() {
+        if (capacity == null) return Integer.MAX_VALUE;
+        return Math.max(0, capacity - registrationsCount);
+    }
+
 
 }
