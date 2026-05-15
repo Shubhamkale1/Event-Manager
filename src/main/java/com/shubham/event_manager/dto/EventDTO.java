@@ -52,4 +52,8 @@ public class EventDTO {
     private List<Long> categoryIds;
     private List<String> categoryNames;
 
+    private Integer registrationsCount;
+    private Integer spotsRemaining;
+    private Boolean isFull;
+
 }
