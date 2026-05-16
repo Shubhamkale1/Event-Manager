@@ -44,7 +44,7 @@ public class Event {
         createdAt = LocalDateTime.now();
     }
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "venue_id")
     private Venue venue;
 
@@ -53,7 +53,7 @@ public class Event {
     @JoinColumn(name = "organization_id")
     private Organization organization;
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "event_categories",
             joinColumns = @JoinColumn(
@@ -63,6 +63,26 @@ public class Event {
     )
     private List<Category> categories
             = new ArrayList<>();
+
+    @Column(nullable = false)
+    private Integer registrationsCount = 0;
+
+    @OneToMany(
+            mappedBy = "event",
+            fetch = FetchType.LAZY
+    )
+    private List<Registration> registrations
+            = new ArrayList<>();
+
+    public boolean isFull() {
+        if (capacity == null) return false;
+        return registrationsCount >= capacity;
+    }
+
+    public int getSpotsRemaining() {
+        if (capacity == null) return Integer.MAX_VALUE;
+        return Math.max(0, capacity - registrationsCount);
+    }
 
 
 }
