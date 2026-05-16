@@ -44,7 +44,7 @@ public class Event {
         createdAt = LocalDateTime.now();
     }
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "venue_id")
     private Venue venue;
 
@@ -53,7 +53,7 @@ public class Event {
     @JoinColumn(name = "organization_id")
     private Organization organization;
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "event_categories",
             joinColumns = @JoinColumn(
