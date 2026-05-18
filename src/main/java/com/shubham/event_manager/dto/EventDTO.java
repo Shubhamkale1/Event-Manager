@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
+import com.shubham.event_manager.entity.EventStatus;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -55,5 +56,11 @@ public class EventDTO {
     private Integer registrationsCount;
     private Integer spotsRemaining;
     private Boolean isFull;
+
+    private EventStatus status;
+    private LocalDateTime publishedAt;
+    private LocalDateTime cancelledAt;
+    private LocalDateTime completedAt;
+    private String cancellationReason;
 
 }
