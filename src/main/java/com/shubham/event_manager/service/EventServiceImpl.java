@@ -16,9 +16,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -36,11 +38,13 @@ public class EventServiceImpl implements EventService {
     private final CategoryRepository    categoryRepository;
 
 
+    // Update getAllEvents in EventServiceImpl
     @Override
     @Cacheable(value = "events")
+    @Transactional(readOnly = true)
     public List<EventDTO> getAllEvents() {
-        log.info("Cache miss — fetching all events from database");
-        return eventRepository.findAll()
+        log.info("Cache miss — fetching published events");
+        return eventRepository.findAllPublished()
                 .stream()
                 .map(eventMapper::toDTO)
                 .collect(Collectors.toList());
@@ -178,6 +182,26 @@ public class EventServiceImpl implements EventService {
             String category) {
         return eventSearchRepository
                 .findByCategories(category);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<EventDTO> getUpcomingEvents() {
+        return eventRepository
+                .findUpcoming(LocalDateTime.now())
+                .stream()
+                .map(eventMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<EventDTO> getPastEvents() {
+        return eventRepository
+                .findPast(LocalDateTime.now())
+                .stream()
+                .map(eventMapper::toDTO)
+                .collect(Collectors.toList());
     }
 
 

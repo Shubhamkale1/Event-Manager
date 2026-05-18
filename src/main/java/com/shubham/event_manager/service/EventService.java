@@ -22,4 +22,7 @@ public interface EventService {
 
     List<EventDocument> getEventsByCategory(
             String category);
+
+    List<EventDTO> getUpcomingEvents();
+    List<EventDTO> getPastEvents();
 }
