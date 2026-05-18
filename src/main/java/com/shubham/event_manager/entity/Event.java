@@ -84,5 +84,26 @@ public class Event {
         return Math.max(0, capacity - registrationsCount);
     }
 
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private EventStatus status = EventStatus.PUBLISHED;
+
+    private LocalDateTime publishedAt;
+    private LocalDateTime cancelledAt;
+    private LocalDateTime completedAt;
+
+    @Column(length = 500)
+    private String cancellationReason;
+
+    public boolean canTransitionTo(EventStatus newStatus) {
+        return switch (this.status) {
+            case DRAFT -> newStatus == EventStatus.PUBLISHED
+                    || newStatus == EventStatus.CANCELLED;
+            case PUBLISHED -> newStatus == EventStatus.CANCELLED
+                    || newStatus == EventStatus.COMPLETED;
+            case CANCELLED, COMPLETED -> false;
+        };
+    }
+
 
 }
