@@ -46,6 +46,12 @@ public interface EventMapper {
             expression = "java(event.getCapacity() != null " +
                     "? event.isFull() : false)"
     )
+    @Mapping(target = "status", source = "status")
+    @Mapping(target = "publishedAt", source = "publishedAt")
+    @Mapping(target = "cancelledAt", source = "cancelledAt")
+    @Mapping(target = "completedAt", source = "completedAt")
+    @Mapping(target = "cancellationReason",
+            source = "cancellationReason")
     EventDTO toDTO(Event event);
 
     // ── toEntity ───────────────────────────────────────
@@ -58,6 +64,10 @@ public interface EventMapper {
     @Mapping(target = "registrations", ignore = true)
     @Mapping(target = "registrationsCount", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "status", ignore = true)
+    @Mapping(target = "publishedAt", ignore = true)
+    @Mapping(target = "cancelledAt", ignore = true)
+    @Mapping(target = "completedAt", ignore = true)
     Event toEntity(EventDTO dto);
 
     // ── updateEntityFromDTO ────────────────────────────
@@ -103,4 +113,6 @@ public interface EventMapper {
                 .map(Category::getName)
                 .collect(Collectors.toList());
     }
+
+
 }

@@ -84,4 +84,20 @@ public class EventController {
         return ResponseEntity.ok(
                 eventService.getEventsByCategory(category));
     }
+
+    @GetMapping("/upcoming")
+    @Operation(summary = "Get upcoming published events")
+    public ResponseEntity<List<EventDTO>>
+    getUpcoming() {
+        return ResponseEntity.ok(
+                eventService.getUpcomingEvents());
+    }
+
+    @GetMapping("/past")
+    @Operation(summary = "Get past published events")
+    public ResponseEntity<List<EventDTO>>
+    getPast() {
+        return ResponseEntity.ok(
+                eventService.getPastEvents());
+    }
 }
