@@ -20,10 +20,11 @@ import java.util.stream.Collectors;
 public class RegistrationServiceImpl
         implements RegistrationService {
 
-    private final RegistrationRepository
-            registrationRepository;
+    private final RegistrationRepository registrationRepository;
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
+
 
     private User getUser(String email) {
         return userRepository.findByEmail(email)
@@ -105,6 +106,8 @@ public class RegistrationServiceImpl
         Registration saved =
                 registrationRepository
                         .save(registration);
+
+        notificationService.notifyRegistrationConfirmed(saved);
 
         log.info("{} registered for event: {}",
                 userEmail, event.getTitle());

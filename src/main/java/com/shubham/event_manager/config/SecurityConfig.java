@@ -70,7 +70,8 @@ public class SecurityConfig {
                                 "/api/admin/**"
                         ).hasRole("ADMIN")
                         .requestMatchers(
-                                "/api/users/**"    // ← all user endpoints protected
+                                "/api/users/**",
+                                "/api/notifications/**"
                         ).authenticated()
                         .anyRequest().authenticated()
                 )

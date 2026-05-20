@@ -63,4 +63,6 @@ public class EventDTO {
     private LocalDateTime completedAt;
     private String cancellationReason;
 
+    private Long organizationId;
+
 }

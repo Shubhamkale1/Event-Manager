@@ -5,6 +5,7 @@ import com.shubham.event_manager.dto.OrganizationSummaryDTO;
 import com.shubham.event_manager.entity.*;
 import com.shubham.event_manager.exception.ResourceNotFoundException;
 import com.shubham.event_manager.repository.*;
+import com.shubham.event_manager.service.NotificationService;
 import com.shubham.event_manager.service.OrganizationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +26,7 @@ public class OrganizationServiceImpl
     private final OrganizationFollowerRepository
             followerRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     // ── Helper ─────────────────────────────────────────
 
@@ -217,6 +219,7 @@ public class OrganizationServiceImpl
                         .build();
 
         followerRepository.save(follower);
+        notificationService.notifyNewFollower(org, user);
         log.info("{} followed {}", userEmail, org.getName());
     }
 
