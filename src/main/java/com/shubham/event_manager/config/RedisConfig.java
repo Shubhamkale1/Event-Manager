@@ -25,13 +25,18 @@ public class RedisConfig {
             RedisConnectionFactory factory
     ) {
 
-        // CUSTOM OBJECT MAPPER
         ObjectMapper mapper = new ObjectMapper();
 
         mapper.registerModule(new JavaTimeModule());
 
         mapper.disable(
                 SerializationFeature.WRITE_DATES_AS_TIMESTAMPS
+        );
+
+        // IMPORTANT FIX
+        mapper.activateDefaultTyping(
+                mapper.getPolymorphicTypeValidator(),
+                ObjectMapper.DefaultTyping.NON_FINAL
         );
 
         GenericJackson2JsonRedisSerializer serializer =
