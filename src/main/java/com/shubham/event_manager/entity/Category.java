@@ -31,6 +31,7 @@ public class Category {
             mappedBy = "categories",
             fetch = FetchType.LAZY
     )
+    @Builder.Default
     private List<Event> events = new ArrayList<>();
 
     @Column(updatable = false)
