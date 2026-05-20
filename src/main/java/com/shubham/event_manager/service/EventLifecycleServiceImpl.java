@@ -1,4 +1,4 @@
-package com.shubham.event_manager.service.impl;
+package com.shubham.event_manager.service;
 
 import com.shubham.event_manager.dto.EventDTO;
 import com.shubham.event_manager.dto.EventLifecycleRequest;
@@ -25,9 +25,9 @@ public class EventLifecycleServiceImpl
 
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
-    private final RegistrationRepository
-            registrationRepository;
+    private final RegistrationRepository registrationRepository;
     private final EventMapper eventMapper;
+    private final NotificationService notificationService;
 
     // ── Helpers ────────────────────────────────────────
 
@@ -170,38 +170,19 @@ public class EventLifecycleServiceImpl
     // ── Private: Notify registered users ──────────────
 
     private void notifyRegisteredUsers(Event event) {
+
         List<Registration> registrations =
                 registrationRepository
-                        .findByEventOrderByRegisteredAtAsc(
-                                event);
+                        .findByEventOrderByRegisteredAtAsc(event);
 
-        long confirmedCount = registrations.stream()
-                .filter(r -> r.getStatus()
-                        == RegistrationStatus.CONFIRMED)
-                .count();
+        // Create in-app notifications
+        notificationService.notifyEventCancelled(
+                event, registrations);
 
         log.info(
-                "Event {} cancelled. {} registered " +
-                        "users will be notified. " +
-                        "Reason: {}",
-                event.getId(),
-                confirmedCount,
-                event.getCancellationReason());
-
-        // In Phase 5 — publish Kafka message here
-        // For now — log the notification
-        // Notification system comes in next feature
-        registrations.stream()
-                .filter(r -> r.getStatus()
-                        == RegistrationStatus.CONFIRMED)
-                .forEach(r ->
-                        log.info(
-                                "NOTIFY: {} — Event '{}' " +
-                                        "has been cancelled. Reason: {}",
-                                r.getUser().getEmail(),
-                                event.getTitle(),
-                                event.getCancellationReason()
-                        )
-                );
+                "Notifications created for {} " +
+                        "registered users of cancelled event {}",
+                registrations.size(),
+                event.getId());
     }
 }
