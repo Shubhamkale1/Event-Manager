@@ -24,6 +24,7 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final AuthenticationManager authenticationManager;
+    private final NotificationService notificationService;
 
     @Override
        public AuthResponse register(RegisterRequest request){
@@ -39,6 +40,7 @@ public class AuthServiceImpl implements AuthService {
                 .build();
 
         userRepository.save(user);
+        notificationService.notifyWelcome(user);
         log.info("New user registered: {}", request.getEmail());
 
         String token = jwtUtil.generateToken(user);
