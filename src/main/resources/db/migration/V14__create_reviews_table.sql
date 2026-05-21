@@ -14,7 +14,7 @@ CREATE TABLE reviews (
         ON DELETE CASCADE,
     CONSTRAINT fk_review_event
         FOREIGN KEY (event_id)
-        REFERENCES event(id)
+        REFERENCES events(id)
         ON DELETE CASCADE,
     CONSTRAINT chk_rating
         CHECK (rating BETWEEN 1 AND 5)
