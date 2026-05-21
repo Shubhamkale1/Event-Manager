@@ -10,6 +10,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -89,5 +90,10 @@ public class User implements UserDetails {
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
+
+    @ManyToMany(mappedBy = "bookmarkedBy",
+            fetch = FetchType.LAZY)
+    private List<Event> bookmarkedEvents
+            = new ArrayList<>();
 
 }
