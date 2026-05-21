@@ -105,5 +105,13 @@ public class Event {
         };
     }
 
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "bookmarks",
+            joinColumns = @JoinColumn(name = "event_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private List<User> bookmarkedBy = new ArrayList<>();
+
 
 }
