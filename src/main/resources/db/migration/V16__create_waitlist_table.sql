@@ -14,6 +14,6 @@ CREATE TABLE waitlist (
         ON DELETE CASCADE,
     CONSTRAINT fk_waitlist_event
         FOREIGN KEY (event_id)
-        REFERENCES event(id)
+        REFERENCES events(id)
         ON DELETE CASCADE
 );
