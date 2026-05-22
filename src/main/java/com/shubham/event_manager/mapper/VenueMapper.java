@@ -8,6 +8,9 @@ import org.springframework.stereotype.Component;
 public class VenueMapper {
 
     public VenueDTO toDTO(Venue venue) {
+        if (venue == null) {
+            return null;
+        }
         VenueDTO dto = new VenueDTO();
         dto.setId(venue.getId());
         dto.setName(venue.getName());

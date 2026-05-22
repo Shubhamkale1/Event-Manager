@@ -9,6 +9,7 @@ import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Document(indexName = "events")
 @Data
@@ -32,4 +33,7 @@ public class EventDocument {
     private LocalDateTime eventDate;
 
     private Integer capacity;
+
+    @Field(type = FieldType.Keyword)
+    private List<String> categories;
 }

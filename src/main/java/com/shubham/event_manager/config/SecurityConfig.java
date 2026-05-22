@@ -45,19 +45,23 @@ public class SecurityConfig {
                                 "/api-docs/**",
                                 "/v3/api-docs/**",
                                 "/login/oauth2/**",
-                                "/oauth2/**"
+                                "/oauth2/**",
+                                "/api/system/**"   // health is public
                         ).permitAll()
                         .requestMatchers(
                                 HttpMethod.GET,
                                 "/api/events/**",
                                 "/api/venues/**",
-                                "/api/organizations/**"
+                                "/api/organizations/**",
+                                "/api/categories/**"
                         ).permitAll()
                         .requestMatchers(
                                 "/api/admin/**"
                         ).hasRole("ADMIN")
                         .requestMatchers(
-                                "/api/users/**"    // ← all user endpoints protected
+                                "/api/notifications/**",
+                                "/api/users/**",
+                                "/api/dashboard/**"
                         ).authenticated()
                         .anyRequest().authenticated()
                 )
