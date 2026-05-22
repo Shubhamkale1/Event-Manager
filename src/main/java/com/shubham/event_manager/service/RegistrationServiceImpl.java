@@ -24,6 +24,7 @@ public class RegistrationServiceImpl
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
     private final NotificationService notificationService;
+    private final WaitlistService waitlistService;
 
 
     private User getUser(String email) {
@@ -147,6 +148,8 @@ public class RegistrationServiceImpl
         // Free up the spot atomically
         registrationRepository
                 .decrementRegistrationCount(eventId);
+
+        waitlistService.promoteFromWaitlist(eventId);
 
         log.info("{} cancelled registration for: {}",
                 userEmail, event.getTitle());
