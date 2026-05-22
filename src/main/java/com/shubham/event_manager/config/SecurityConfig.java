@@ -45,7 +45,8 @@ public class SecurityConfig {
                                 "/api-docs/**",
                                 "/v3/api-docs/**",
                                 "/login/oauth2/**",
-                                "/oauth2/**"
+                                "/oauth2/**",
+                                "/api/system/**"   // health is public
                         ).permitAll()
                         .requestMatchers(
                                 HttpMethod.GET,
@@ -55,23 +56,12 @@ public class SecurityConfig {
                                 "/api/categories/**"
                         ).permitAll()
                         .requestMatchers(
-                                HttpMethod.POST,
-                                "/api/categories/**"
-                        ).hasRole("ADMIN")
-                        .requestMatchers(
-                                HttpMethod.PUT,
-                                "/api/categories/**"
-                        ).hasRole("ADMIN")
-                        .requestMatchers(
-                                HttpMethod.DELETE,
-                                "/api/categories/**"
-                        ).hasRole("ADMIN")
-                        .requestMatchers(
                                 "/api/admin/**"
                         ).hasRole("ADMIN")
                         .requestMatchers(
+                                "/api/notifications/**",
                                 "/api/users/**",
-                                "/api/notifications/**"
+                                "/api/dashboard/**"
                         ).authenticated()
                         .anyRequest().authenticated()
                 )
