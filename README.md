@@ -2,7 +2,7 @@
 
 A **production-ready RESTful Event Management API** built with Spring Boot 3.x, featuring event and venue management, real-time search, caching, security, and AI-powered recommendations.
 
-> **Progressive Learning Journey**: Building from monolith → microservices architecture across 5 phases, learning the entire Spring ecosystem.
+> **Progressive Learning Journey**: Building from monolith → microservices architecture across 5 phases, learning the entire Spring ecosystem
 
 ---
 
