@@ -1,0 +1,135 @@
+version: '3.8'
+
+# ── Networks ──────────────────────────────────────
+# All containers share this network
+# They can find each other by service name
+networks:
+  event-manager-network:
+    driver: bridge
+
+# ── Volumes ───────────────────────────────────────
+# Persistent storage for databases
+# Data survives container restarts
+volumes:
+  mysql-data:
+  redis-data:
+  elasticsearch-data:
+
+# ── Services ──────────────────────────────────────
+services:
+
+  # ── MySQL ────────────────────────────────────────
+  mysql:
+    image: mysql:8.0
+    container_name: event-manager-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: eventdb
+    ports:
+      - "3307:3306"
+    # Port explanation:
+    # 3307 = your laptop port (use this in MySQL Workbench)
+    # 3306 = port inside the container
+    # Using 3307 outside avoids conflict with your local MySQL
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - event-manager-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping",
+             "-h", "localhost",
+             "-u", "root",
+             "-p${DB_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # ── Redis ────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: event-manager-redis
+    restart: unless-stopped
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - event-manager-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # ── Elasticsearch ─────────────────────────────────
+  elasticsearch:
+    image: elasticsearch:8.11.1
+    container_name: event-manager-elasticsearch
+    restart: unless-stopped
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - xpack.security.http.ssl.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    # ES_JAVA_OPTS limits memory usage
+    # Without this Elasticsearch uses 50% of system RAM
+    ports:
+      - "9201:9200"
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    networks:
+      - event-manager-network
+    healthcheck:
+      test: ["CMD-SHELL",
+             "curl -f http://localhost:9200 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  # ── Spring Boot App ───────────────────────────────
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    container_name: event-manager-app
+    restart: unless-stopped
+
+    ports:
+      - "8081:8081"
+
+    environment:
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+
+      JWT: ${JWT}
+
+      GEOCODING_API: ${GEOCODING_API}
+      OPENAI_KEY: ${OPENAI_KEY}
+
+      OAUTH2_ID: ${OAUTH2_ID}
+      OAUTH2_SECRET: ${OAUTH2_SECRET}
+
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+
+    networks:
+      - event-manager-network
+    healthcheck:
+      test: ["CMD", "curl", "-f",
+             "http://localhost:8081/api/system/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
