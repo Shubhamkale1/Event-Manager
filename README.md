@@ -6,6 +6,12 @@ A **production-ready RESTful Event Management API** built with Spring Boot 3.x, 
 
 ---
 
+# Event Management System — REST API
+
+[![CI Tests](https://github.com/Shubhamkale1/Event-Manager/actions/workflows/ci.yml/badge.svg)](https://github.com/Shubhamkale1/Event-Manager/actions/workflows/ci.yml)
+
+[![Docker Build](https://github.com/Shubhamkale1/Event-Manager/actions/workflows/docker-build.yml/badge.svg)](https://github.com/Shubhamkale1/Event-Manager/actions/workflows/docker-build.yml)
+---
 ### **API Documentation**
 [GitHub Wiki](https://github.com/Shubhamkale1/Event-Manager/wiki)
 
