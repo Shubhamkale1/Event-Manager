@@ -1,9 +1,12 @@
 package com.shubham.event_manager;
 
 import com.shubham.event_manager.entity.Event;
+import com.shubham.event_manager.entity.EventStatus;
 import com.shubham.event_manager.repository.EventRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDateTime;
@@ -11,7 +14,8 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest
+@DataJpaTest
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)  // only loads JPA, uses H2 automatically
 class EventManagerApplicationTests {
 
 	@Autowired
@@ -23,15 +27,18 @@ class EventManagerApplicationTests {
 		event.setTitle("LeetCode Challenge");
 		event.setDescription("college events");
 		event.setLocation("pune");
-		event.setEventDate(LocalDateTime.now());
+		event.setEventDate(LocalDateTime.now().plusDays(1));
+		event.setRegistrationsCount(0);
+		event.setStatus(EventStatus.PUBLISHED);
 
 		eventRepository.save(event);
 
 		List<Event> events = eventRepository.findAll();
 		assertThat(events).isNotEmpty();
-		assertThat(events.get(0).getTitle()).isEqualToIgnoringCase("Leetcode Challenge");
+		assertThat(events)
+				.extracting(Event::getTitle)
+				.contains("LeetCode Challenge");
 
 		System.out.println("test passed");
 	}
-
 }

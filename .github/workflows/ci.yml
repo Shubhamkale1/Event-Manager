@@ -1,0 +1,133 @@
+name: CI — Run Tests
+
+# ── Triggers ──────────────────────────────────────
+on:
+  push:
+    branches:
+      - main
+      - phase-4-features
+      - 'feature/**'
+      - 'phase-5-**'
+      - CI-Workflow
+  pull_request:
+    branches:
+      - main
+
+# Run on every push to any feature branch
+# Run on pull requests targeting main
+# This catches bugs before they reach main
+
+jobs:
+
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+
+    # ── Services ────────────────────────────────────
+    # Real databases for real tests
+    services:
+
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: testpassword
+          MYSQL_DATABASE: eventdb_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost
+          -u root -ptestpassword"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
+    # ── Steps ───────────────────────────────────────
+    steps:
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+        # Downloads your repository code to the runner
+        # Without this step your code is not on the VM
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          # temurin = same JDK we use in Docker
+          # Ensures consistent behavior
+
+      - name: Cache Maven dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+          # If exact key not found, try prefix match
+          # Better cache hit rate
+
+      - name: Run tests
+        run: mvn clean test -q
+        env:
+          # Database — connects to the mysql service above
+          SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/eventdb_test?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
+          SPRING_DATASOURCE_USERNAME: root
+          SPRING_DATASOURCE_PASSWORD: testpassword
+
+          # Redis — connects to redis service above
+          SPRING_DATA_REDIS_HOST: localhost
+          SPRING_DATA_REDIS_PORT: 6379
+
+          # Elasticsearch — disabled in tests
+          # Too heavy to run in CI
+          SPRING_AUTOCONFIGURE_EXCLUDE: org.springframework.boot.autoconfigure.elasticsearch.ElasticsearchRestClientAutoConfiguration,org.springframework.boot.autoconfigure.data.elasticsearch.ElasticsearchDataAutoConfiguration,org.springframework.boot.autoconfigure.data.elasticsearch.ElasticsearchRepositoriesAutoConfiguration
+
+          # JWT
+          APP_JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          APP_JWT_EXPIRATION: 86400000
+
+          # Email
+          SPRING_MAIL_HOST: sandbox.smtp.mailtrap.io
+          SPRING_MAIL_PORT: 2525
+          SPRING_MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
+          SPRING_MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
+
+          # Geocoding
+          APP_GEOCODING_API_KEY: ${{ secrets.GEOCODING_API_KEY }}
+
+          # AI
+          SPRING_AI_OPENAI_API_KEY: ${{ secrets.AI_API_KEY }}
+          SPRING_AI_OPENAI_BASE_URL: https://api.groq.com/openai
+          SPRING_AI_OPENAI_CHAT_OPTIONS_MODEL: llama3-8b-8192
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        # if: always() → runs even if tests failed
+        # So you can download and examine failed test reports
+        with:
+          name: test-results-${{ github.run_number }}
+          path: target/surefire-reports/
+          retention-days: 7
+          # Keep for 7 days then auto-delete
+
+      - name: Test summary
+        if: always()
+        run: |
+          echo "## Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "Branch: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "Commit: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "Triggered by: ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+        # This writes a summary visible in GitHub Actions UI
+        # Shows which branch, commit, and who triggered it
