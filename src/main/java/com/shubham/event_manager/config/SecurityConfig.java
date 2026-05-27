@@ -1,8 +1,10 @@
 package com.shubham.event_manager.config;
 
-
 import com.shubham.event_manager.security.CustomUserDetailsService;
 import com.shubham.event_manager.security.JwtAuthenticationFilter;
+import com.shubham.event_manager.security.OAuth2UserService;
+import com.shubham.event_manager.security.OAuth2SuccessHandler;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,8 +21,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import com.shubham.event_manager.security.OAuth2UserService;
-import com.shubham.event_manager.security.OAuth2SuccessHandler;
 
 @Configuration
 @EnableWebSecurity
@@ -33,9 +33,11 @@ public class SecurityConfig {
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
+    public SecurityFilterChain securityFilterChain(
+            HttpSecurity http) throws Exception {
         http
-                .csrf(AbstractHttpConfigurer ::disable)
+                .csrf(AbstractHttpConfigurer::disable)
+
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/api/auth/**",
@@ -46,7 +48,7 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",
                                 "/login/oauth2/**",
                                 "/oauth2/**",
-                                "/api/system/**"   // health is public
+                                "/api/system/**"
                         ).permitAll()
                         .requestMatchers(
                                 HttpMethod.GET,
@@ -65,13 +67,35 @@ public class SecurityConfig {
                         ).authenticated()
                         .anyRequest().authenticated()
                 )
+
                 .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                        .sessionCreationPolicy(
+                                SessionCreationPolicy.STATELESS)
                 )
+
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(
+                                (request, response, authException) -> {
+                                    response.setStatus(
+                                            HttpServletResponse.SC_UNAUTHORIZED);
+                                    response.setContentType(
+                                            "application/json");
+                                    response.getWriter().write(
+                                            "{\"status\":401," +
+                                                    "\"message\":" +
+                                                    "\"Unauthorized — please login first\"}"
+                                    );
+                                }
+                        )
+                )
+
                 .authenticationProvider(authenticationProvider())
-                .addFilterBefore(jwtAuthenticationFilter,
+
+                .addFilterBefore(
+                        jwtAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class
                 )
+
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo
                                 .userService(oAuth2UserService)
@@ -83,21 +107,23 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationProvider authenticationProvider(){
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-                provider.setUserDetailsService(userDetailsService);
-                provider.setPasswordEncoder(passwordEncoder());
-                return provider;
+    public AuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider provider =
+                new DaoAuthenticationProvider();
+        provider.setUserDetailsService(userDetailsService);
+        provider.setPasswordEncoder(passwordEncoder());
+        return provider;
     }
 
     @Bean
     public AuthenticationManager authenticationManager(
-            AuthenticationConfiguration config) throws Exception{
+            AuthenticationConfiguration config)
+            throws Exception {
         return config.getAuthenticationManager();
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder(){
+    public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 }

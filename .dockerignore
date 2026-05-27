@@ -1,0 +1,23 @@
+# Git
+.git
+.gitignore
+
+# IDE
+.idea
+*.iml
+*.iws
+.vscode
+
+# Build artifacts (Docker builds these fresh)
+target/
+
+# Environment files (never in Docker context)
+.env
+
+# Documentation
+*.md
+docs/
+
+# OS files
+.DS_Store
+Thumbs.db
