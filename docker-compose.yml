@@ -18,78 +18,142 @@ volumes:
 # ── Services ──────────────────────────────────────
 services:
 
-  # ── MySQL ────────────────────────────────────────
+  # ── MySQL ───────────────────────────────────────
   mysql:
     image: mysql:8.0
     container_name: event-manager-mysql
     restart: unless-stopped
+
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
       MYSQL_DATABASE: eventdb
+
     ports:
       - "3307:3306"
+
     # Port explanation:
     # 3307 = your laptop port (use this in MySQL Workbench)
     # 3306 = port inside the container
     # Using 3307 outside avoids conflict with your local MySQL
+
     volumes:
       - mysql-data:/var/lib/mysql
+
     networks:
       - event-manager-network
+
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping",
-             "-h", "localhost",
-             "-u", "root",
-             "-p${DB_PASSWORD}"]
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-u",
+          "root",
+          "-p${DB_PASSWORD}"
+        ]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 30s
 
-  # ── Redis ────────────────────────────────────────
+  # ── Redis ───────────────────────────────────────
   redis:
     image: redis:7-alpine
     container_name: event-manager-redis
     restart: unless-stopped
+
     ports:
       - "6380:6379"
+
     volumes:
       - redis-data:/data
+
     networks:
       - event-manager-network
+
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 5s
       retries: 3
 
-  # ── Elasticsearch ─────────────────────────────────
+  # ── Elasticsearch ───────────────────────────────
   elasticsearch:
     image: elasticsearch:8.11.1
     container_name: event-manager-elasticsearch
     restart: unless-stopped
+
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=false
       - xpack.security.http.ssl.enabled=false
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+
     # ES_JAVA_OPTS limits memory usage
     # Without this Elasticsearch uses 50% of system RAM
+
     ports:
       - "9201:9200"
+
     volumes:
       - elasticsearch-data:/usr/share/elasticsearch/data
+
     networks:
       - event-manager-network
+
     healthcheck:
-      test: ["CMD-SHELL",
-             "curl -f http://localhost:9200 || exit 1"]
+      test:
+        [
+          "CMD-SHELL",
+          "curl -f http://localhost:9200 || exit 1"
+        ]
       interval: 30s
       timeout: 10s
       retries: 5
       start_period: 30s
 
-  # ── Spring Boot App ───────────────────────────────
+  # ── Zookeeper ───────────────────────────────────
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: event-manager-zookeeper
+    restart: unless-stopped
+
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+    ports:
+      - "2181:2181"
+
+    networks:
+      - event-manager-network
+
+  # ── Kafka ───────────────────────────────────────
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: event-manager-kafka
+    restart: unless-stopped
+
+    depends_on:
+      - zookeeper
+
+    ports:
+      - "9092:9092"
+
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+    networks:
+      - event-manager-network
+
+  # ── Spring Boot App ─────────────────────────────
   app:
     build:
       context: .
@@ -123,12 +187,20 @@ services:
         condition: service_healthy
       elasticsearch:
         condition: service_healthy
+      kafka:
+        condition: service_started
 
     networks:
       - event-manager-network
+
     healthcheck:
-      test: ["CMD", "curl", "-f",
-             "http://localhost:8081/api/system/health"]
+      test:
+        [
+          "CMD",
+          "curl",
+          "-f",
+          "http://localhost:8081/api/system/health"
+        ]
       interval: 30s
       timeout: 10s
       retries: 3
