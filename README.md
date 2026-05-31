@@ -14,7 +14,10 @@
 
 *Inspired by real-world platforms like Eventbrite, BookMyShow, and Meetup.*
 
-[📖 API Docs](https://github.com/Shubhamkale1/event-manager/wiki) • [🚀 Quick Start](#-quick-start) • [🏗️ Architecture](#-architecture) • [📡 Endpoints](#-api-endpoints)
+[📖 API Docs](https://github.com/Shubhamkale1/event-manager/wiki) •
+[🚀 Quick Start](#-quick-start) •
+[🏗️ System Architecture](#️-system-architecture) •
+[📡 API Endpoints](#-api-endpoints-summary)
 
 </div>
 
