@@ -1,369 +1,425 @@
-# 🎉 Event Management System
+<div align="center">
 
-A **production-ready RESTful Event Management API** built with Spring Boot 3.x, featuring event and venue management, real-time search, caching, security, and AI-powered recommendations.
+# 🎟️ Event Management System — REST API
 
-> **Progressive Learning Journey**: Building from monolith → microservices architecture across 5 phases, learning the entire Spring ecosystem
+[![CI Tests](https://img.shields.io/github/actions/workflow/status/Shubhamkale1/event-manager/ci.yml?label=CI%20Tests&style=for-the-badge&logo=github-actions&logoColor=white)](https://github.com/Shubhamkale1/event-manager/actions)
+[![Docker Build](https://img.shields.io/github/actions/workflow/status/Shubhamkale1/event-manager/docker-build.yml?label=Docker%20Build&style=for-the-badge&logo=docker&logoColor=white)](https://github.com/Shubhamkale1/event-manager/actions)
+[![Java](https://img.shields.io/badge/Java-17-ED8B00?style=for-the-badge&logo=java&logoColor=white)](https://www.oracle.com/java/)
+[![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.4.1-6DB33F?style=for-the-badge&logo=spring-boot)](https://spring.io/projects/spring-boot)
+[![Apache Kafka](https://img.shields.io/badge/Apache_Kafka-3.x-231F20?style=for-the-badge&logo=apache-kafka)](https://kafka.apache.org/)
+[![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=for-the-badge&logo=docker)](https://www.docker.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
+
+**A production-grade, microservices-based Event Management REST API built progressively across 5 phases — from a simple monolith to a cloud-ready distributed system with Kafka messaging, Docker containerization, and real-time monitoring.**
+
+*Inspired by real-world platforms like Eventbrite, BookMyShow, and Meetup.*
+
+[📖 API Docs](https://github.com/Shubhamkale1/event-manager/wiki) • [🚀 Quick Start](#-quick-start) • [🏗️ Architecture](#-architecture) • [📡 Endpoints](#-api-endpoints)
+
+</div>
 
 ---
 
-# Event Management System — REST API
+## 📖 What Is This Project?
 
-[![CI Tests](https://github.com/Shubhamkale1/Event-Manager/actions/workflows/ci.yml/badge.svg)](https://github.com/Shubhamkale1/Event-Manager/actions/workflows/ci.yml)
+This is not a simple CRUD application. It is a real backend system designed and built the way companies actually evolve software — starting with a working monolith, adding technologies only when they solve real problems, and ending with a cloud-ready microservices architecture.
 
-[![Docker Build](https://github.com/Shubhamkale1/Event-Manager/actions/workflows/docker-build.yml/badge.svg)](https://github.com/Shubhamkale1/Event-Manager/actions/workflows/docker-build.yml)
----
-### **API Documentation**
-[GitHub Wiki](https://github.com/Shubhamkale1/Event-Manager/wiki)
+Every technology was added at the right moment. Redis came when the database was being hit unnecessarily. Elasticsearch came when LIKE queries weren't good enough. Kafka came when synchronous email delivery was blocking API responses. Each phase solved a problem the previous phase created.
 
 ---
 
-## 📋 Table of Contents
+## 🏗️ Architecture
 
-- [✨ Features](#-features)
-- [🏗️ Architecture & Tech Stack](#️-architecture--tech-stack)
-- [📊 Project Phases](#-project-phases)
-- [🚀 Getting Started](#-getting-started)
-- [🔐 Authentication & Security](#-authentication--security)
-- [⚙️ Configuration](#️-configuration)
-- [🛠️ Development](#️-development)
-- [📝 Contributing](#-contributing)
-- [📄 License](#-license)
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                        CLIENT (Postman / Web)                        │
+└──────────────────────────┬──────────────────────────────────────────┘
+                           │ HTTPS
+┌──────────────────────────▼──────────────────────────────────────────┐
+│                    SPRING BOOT API (Port 8081)                        │
+│  ┌─────────────┐  ┌─────────────┐  ┌────────────┐  ┌─────────────┐ │
+│  │ Controllers │→ │  Services   │→ │Repositories│→ │   MySQL 8   │ │
+│  │ (REST Layer)│  │(Biz Logic)  │  │(Data Layer)│  │  (Primary)  │ │
+│  └─────────────┘  └──────┬──────┘  └────────────┘  └─────────────┘ │
+│                          │                                           │
+│              ┌───────────┼───────────┐                              │
+│              ▼           ▼           ▼                              │
+│         ┌─────────┐ ┌─────────┐ ┌────────────────┐                 │
+│         │  Redis  │ │  Kafka  │ │ Elasticsearch  │                 │
+│         │ (Cache) │ │(Events) │ │   (Search)     │                 │
+│         └─────────┘ └────┬────┘ └────────────────┘                 │
+└─────────────────────────-│───────────────────────────────────────── ┘
+                           │ Kafka Topics
+              ┌────────────▼────────────┐
+              │    EMAIL MICROSERVICE    │
+              │      (Port 8082)         │
+              │  Kafka Consumer          │
+              │  Sends emails via SMTP   │
+              └─────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────┐
+│                      OBSERVABILITY STACK                             │
+│         Prometheus (9090)  →  Grafana Dashboard (3000)              │
+│         Scrapes /actuator/prometheus every 15 seconds               │
+└─────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────┐
+│                         CI/CD PIPELINE                               │
+│   GitHub Push → GitHub Actions → Tests → Docker Build → Docker Hub  │
+└─────────────────────────────────────────────────────────────────────┘
+```
 
 ---
 
 ## ✨ Features
 
-### 🎫 Event Management
-- ✅ **Full CRUD Operations** — Create, read, update, delete events
-- ✅ **Advanced Filtering** — Filter by date, category, capacity
-- ✅ **Event Categories** — Organize events by type
-- ✅ **Capacity Management** — Track attendee limits
-- ✅ **Timestamps** — Auto-tracked creation/modification times
-- ✅ **Soft Delete Support** — Archive events without data loss
+### Core Platform
+- Full Event CRUD with lifecycle state machine (DRAFT → PUBLISHED → CANCELLED/COMPLETED)
+- Venue management with automatic GPS geocoding via OpenStreetMap API
+- Organization management (groups like "Pune Java User Group") with follower system
+- Category tagging system with Elasticsearch-powered filtered search
+- Event registration with **atomic SQL concurrency control** — zero overselling under any load
 
-### 📍 Venue Management
-- ✅ **Venue CRUD** — Create and manage event venues
-- ✅ **Geocoding Integration** — Automatic latitude/longitude lookup from address
-- ✅ **Google Maps Links** — Generate shareable venue maps
-- ✅ **Venue Filtering** — Search by city or minimum capacity
-- ✅ **Event-Venue Integration** — Assign venues to events with capacity validation
-- ✅ **Rate Limiting** — Protected geocoding API calls
+### Security
+- JWT stateless authentication (HS256, 24-hour expiry)
+- BCrypt password hashing with adaptive cost factor
+- OAuth2 Google Social Login
+- Role-based access control (USER / ADMIN)
+- Per-IP rate limiting via Bucket4j token bucket algorithm
 
-### 🔍 Search & Indexing
-- ✅ **Elasticsearch Integration** — Full-text search on events
-- ✅ **Advanced Queries** — Search by title, description, location
-- ✅ **Real-time Indexing** — Automatic index updates on changes
-- ✅ **Relevance Scoring** — Ranked search results
+### Performance
+- Redis caching with `@Cacheable` / `@CacheEvict` — eliminates redundant database hits
+- Elasticsearch fuzzy search with `fuzziness: AUTO` — finds results despite typos
+- HikariCP connection pooling for efficient database connections
+- Async email via `@Async` — API never blocks on email delivery
 
-### ⚡ Performance & Caching
-- ✅ **Redis Caching** — Cache frequently accessed data
-- ✅ **TTL Configuration** — Configurable cache expiration
-- ✅ **Smart Invalidation** — Cache cleared on updates
-- ✅ **Response Compression** — Gzip content encoding
+### Engagement
+- Real-time in-app notification system (EVENT_CANCELLED, REGISTRATION_CONFIRMED, NEW_FOLLOWER)
+- Reviews and ratings with multi-layer validation (only attendees of completed events)
+- Bookmarks / wishlist for events
+- Waitlist with automatic promotion on cancellation
 
-### 🔐 Security & Authentication
-- ✅ **Spring Security** — Role-based access control (RBAC)
-- ✅ **JWT Tokens** — Secure stateless authentication
-- ✅ **OAuth2 Integration** — Google OAuth2 login support
-- ✅ **Password Hashing** — BCrypt password encoding
-- ✅ **Admin Dashboard** — User management endpoints
-- ✅ **JSON Error Responses** — Standardized API error format
+### Event-Driven Architecture
+- **Apache Kafka** message bus between main app and Email microservice
+- Event cancellations publish to `event.cancelled` topic — email service consumes asynchronously
+- Registration confirmations publish to `event.registered` topic
+- Zero coupling between services — each evolves independently
 
-### 📧 Notifications
-- ✅ **Email Service** — Async email sending
-- ✅ **Event Notifications** — Alert attendees of changes
-- ✅ **Template Support** — Customizable email templates
-- ✅ **Mailtrap Integration** — Development email testing
+### DevOps & Observability
+- **Docker** multi-stage builds — final image 220MB vs 720MB without multi-stage
+- **Docker Compose** — one command starts all 8 services
+- **GitHub Actions CI/CD** — tests run on every push, Docker image built on merge to main
+- **Prometheus + Grafana** — real-time dashboard (request rate, P95 latency, JVM memory, DB connections)
+- Custom `GET /api/system/health` endpoint checks MySQL, Redis, Elasticsearch
 
-### 🧠 AI Features
-- ✅ **Spring AI Integration** — LLM-powered recommendations
-- ✅ **Event Suggestions** — AI-generated event recommendations
-- ✅ **Natural Language Support** — Groq & OpenAI models
-
-### 📖 API Documentation
-- ✅ **OpenAPI 3.0 / Swagger** — Interactive API explorer
-- ✅ **Endpoint Documentation** — Auto-generated from annotations
-- ✅ **Schema Definitions** — Request/response models
-- ✅ **Try-it-out Support** — Test endpoints directly from docs
+### Analytics & Export
+- Organizer dashboard with registration rate, turnout metrics
+- Platform-wide admin analytics
+- CSV and Excel (`.xlsx`) attendee export via Apache POI
 
 ---
 
-## 🏗️ Architecture & Tech Stack
+## 🗺️ Project Phases
 
-### **Backend Stack**
-| Layer | Technology |
-|-------|-----------|
-| **Framework** | Spring Boot 3.4.1 |
-| **Language** | Java 17 |
-| **REST API** | Spring Web MVC |
-| **ORM** | Spring Data JPA + Hibernate |
-| **Database** | MySQL 8.0 |
-| **Migrations** | Flyway |
-| **Validation** | Jakarta Bean Validation |
-| **Mapping** | MapStruct (DTO ↔ Entity) |
-| **Security** | Spring Security + JWT + OAuth2 |
-| **Search** | Elasticsearch 8.x |
-| **Cache** | Redis (Spring Data Redis) |
-| **Email** | Spring Mail (SMTP) |
-| **AI** | Spring AI + Groq/OpenAI |
-| **Logging** | SLF4J + Logback |
-| **Build** | Maven 3.x |
-| **Testing** | JUnit 5 + Mockito |
-
-### **External Services**
-- 🗺️ **Geocoding API** — `geocode.maps.co` for address-to-coordinates conversion
-- 📧 **Email Service** — Mailtrap SMTP for development/production
-- 🤖 **LLM Services** — Groq, OpenAI, or Anthropic Claude
-- 🔐 **OAuth2 Provider** — Google Cloud Console
+| Phase | Focus | Key Technologies | Status |
+|-------|-------|-----------------|--------|
+| **Phase 1** | Core REST API | Spring Boot, JPA, H2, Lombok | ✅ Complete |
+| **Phase 2** | Persistence & Validation | MySQL, Flyway, MapStruct, JUnit 5 | ✅ Complete |
+| **Phase 3** | Performance & Search | Redis, Elasticsearch, Swagger, Email | ✅ Complete |
+| **Phase 4** | Security & Features | JWT, OAuth2, Kafka, Rate Limiting, Spring AI | ✅ Complete |
+| **Phase 5** | Cloud & Microservices | Docker, GitHub Actions, Kafka, Prometheus, Grafana | ✅ Complete |
 
 ---
 
-## 📊 Project Phases
+## 🛠️ Tech Stack
 
-| Phase | Focus | Status | Features |
-|-------|-------|--------|----------|
-| **Phase 1** | Core REST API | ✅ Complete | Events CRUD, JPA, H2 Testing |
-| **Phase 2** | Persistence & Logic | ✅ Complete | MySQL, Flyway, Validation, MapStruct, JUnit |
-| **Phase 3** | Speed & Search | ✅ Complete | Redis Caching, Elasticsearch, Swagger/OpenAPI |
-| **Phase 4** | Security & Venues | 🚀 **In Progress** | Spring Security, OAuth2, Venue Management, Geocoding, AI |
-| **Phase 5** | Cloud & Microservices | 🔜 Planned | Docker, Kubernetes, Kafka, GitHub Actions, CI/CD |
+| Layer | Technology | Version |
+|-------|-----------|---------|
+| Language | Java | 17 |
+| Framework | Spring Boot | 3.4.1 |
+| ORM | Spring Data JPA / Hibernate | 6.6.4 |
+| Database | MySQL | 8.0 |
+| Cache | Redis | 7.x |
+| Search | Elasticsearch | 8.x |
+| Messaging | Apache Kafka | 3.x |
+| Migrations | Flyway | 10.x |
+| Security | Spring Security + JWT | jjwt 0.12.3 |
+| OAuth2 | Google Login | Spring Security OAuth2 |
+| Rate Limiting | Bucket4j | 8.7.0 |
+| Mapping | MapStruct | 1.5.5 |
+| API Docs | Springdoc OpenAPI | 2.7.0 |
+| AI | Spring AI (Groq LLaMA 3) | 1.0.0-M6 |
+| Export | Apache POI | 5.2.5 |
+| Monitoring | Prometheus + Grafana | 2.48 / 10.2 |
+| Containerization | Docker + Compose | 24.x / 2.x |
+| CI/CD | GitHub Actions | — |
+| Build Tool | Maven | 3.x |
 
 ---
 
-## 🚀 Getting Started
+## 📁 Project Structure
 
-### **Prerequisites**
+```
+event-manager/
+├── src/main/java/com/shubham/event_manager/
+│   ├── config/              # Spring configuration beans
+│   ├── controller/          # REST controllers (17 controllers)
+│   ├── document/            # Elasticsearch documents
+│   ├── dto/                 # API request/response objects
+│   ├── entity/              # JPA database entities
+│   ├── exception/           # Global exception handling
+│   ├── kafka/               # Kafka producers and message DTOs
+│   ├── mapper/              # MapStruct entity↔DTO mappers
+│   ├── repository/          # Spring Data repositories
+│   ├── security/            # JWT, OAuth2, UserDetails
+│   └── service/             # Business logic layer
+│       └── impl/            # Service implementations
+│
+├── src/main/resources/
+│   ├── application.properties
+│   ├── application-dev.properties
+│   ├── application-docker.properties
+│   └── db/migration/        # Flyway V1–V14 migrations
+│
+├── email-service/           # Kafka consumer microservice
+│   └── src/main/java/
+│       └── consumer/EmailKafkaConsumer.java
+│
+├── prometheus/
+│   └── prometheus.yml       # Scrape configuration
+│
+├── grafana/
+│   └── provisioning/        # Auto-configured dashboards
+│
+├── .github/workflows/
+│   ├── ci.yml               # Test pipeline
+│   └── docker-build.yml     # Docker build pipeline
+│
+├── Dockerfile               # Multi-stage Docker build
+├── docker-compose.yml       # Full stack orchestration
+└── pom.xml
+```
 
-- **Java 17+** — Download from [oracle.com](https://www.oracle.com/java/technologies/downloads/)
-- **Maven 3.8+** — Download from [maven.apache.org](https://maven.apache.org/)
-- **MySQL 8.0+** — Server running locally or in Docker
-- **Redis** (optional) — For caching features
-- **Elasticsearch** (optional) — For full-text search
-- **Git** — For cloning the repository
+---
 
-### **1️⃣ Clone the Repository**
+## 🗄️ Database Schema
+
+**14 Flyway Migrations (V1–V14)**
+
+| Migration | Description |
+|-----------|-------------|
+| V1 | Create events table |
+| V2 | Add created_at to events |
+| V3 | Create users table |
+| V4 | Seed admin user (BCrypt password) |
+| V5 | Create venues table with geocoding fields |
+| V6 | Add venue_id FK to events |
+| V7 | Add bio, phone, city, updated_at to users |
+| V8 | Create organizations + organization_followers |
+| V9 | Create registrations table + registrations_count |
+| V10 | Add event status + lifecycle timestamps |
+| V11 | Create notifications table with indexes |
+| V12 | Create reviews table with rating constraint |
+| V13 | Create bookmarks junction table |
+| V14 | Create waitlist table with position ordering |
+
+---
+
+## ⚙️ Prerequisites
+
+| Service | Port | Verify |
+|---------|------|--------|
+| Docker Desktop | — | `docker --version` |
+| Java 17+ | — | `java -version` |
+| Maven | — | `mvn --version` |
+
+> All other services (MySQL, Redis, Elasticsearch, Kafka, Prometheus, Grafana) are started automatically by Docker Compose.
+
+---
+
+## 🚀 Quick Start
+
+### Option 1 — Docker Compose (Recommended)
 
 ```bash
-git clone https://github.com/Shubhamkale1/Event-Manager.git
-cd Event-Manager
+# 1. Clone the repository
+git clone https://github.com/Shubhamkale1/event-manager.git
+cd event-manager
+
+# 2. Create environment file
+cp .env.example .env
+# Edit .env with your values
+
+# 3. Start everything
+docker-compose up --build
+
+# 4. Verify all services are running
+docker ps
 ```
 
-### **2️⃣ Set Up Database**
+**Services available after startup:**
 
-**Start MySQL server:**
+| Service | URL | Credentials |
+|---------|-----|-------------|
+| API | http://localhost:8081 | — |
+| Swagger UI | http://localhost:8081/swagger-ui/index.html | — |
+| System Health | http://localhost:8081/api/system/health | — |
+| Kafka UI | http://localhost:8090 | — |
+| Prometheus | http://localhost:9090 | — |
+| Grafana | http://localhost:3000 | admin / admin123 |
+| MySQL | localhost:3307 | root / (from .env) |
+| Redis | localhost:6380 | — |
+| Elasticsearch | localhost:9201 | — |
+
+### Option 2 — Local Development
+
 ```bash
-# macOS (Homebrew)
-brew services start mysql
-
-# Linux (Ubuntu/Debian)
-sudo systemctl start mysql
-
-# Docker
-docker run -d \
-  --name mysql \
-  -e MYSQL_ROOT_PASSWORD=root \
-  -e MYSQL_DATABASE=eventdb \
-  -p 3306:3306 \
-  mysql:8.0
+# Start infrastructure (MySQL, Redis, Elasticsearch)
+# Then run the application with dev profile:
+mvn spring-boot:run -Dspring-boot.run.profiles=dev
 ```
 
+### Environment Variables (`.env`)
 
-
-## 🔐 Authentication & Security
-
-### **JWT Tokens**
-- **Type**: Bearer token in `Authorization` header
-- **Format**: `Authorization: Bearer <token>`
-- **Expiration**: 24 hours (configurable)
-- **Algorithm**: HS256
-
-### **OAuth2 Integration**
-- **Provider**: Google Cloud
-- **Flow**: Authorization Code with PKCE
-- **Scope**: `email`, `profile`
-- **Redirect**: `/login/oauth2/code/google`
-
-### **Password Security**
-- **Hashing**: BCrypt with 10 salt rounds
-- **Validation**: Minimum 8 characters, special chars recommended
-
-### **Role-Based Access Control (RBAC)**
-```
-USER   — Can read events/venues, create events, manage own profile
-ADMIN  — Full access to all endpoints, user management
-```
-
-### **CORS Configuration**
-```java
-// Configured for localhost:3000 (frontend)
-// Update in SecurityConfig for production domains
-```
-
----
-
-## ⚙️ Configuration
-
-### **Application Profiles**
-
-#### Development (`application-dev.properties`)
 ```properties
-spring.profiles.active=dev
-spring.jpa.show-sql=true
-spring.elasticsearch.uris=http://localhost:9200
+DB_PASSWORD=your_mysql_password
+JWT_SECRET=your-jwt-secret-minimum-32-characters
+MAIL_USERNAME=your_mailtrap_username
+MAIL_PASSWORD=your_mailtrap_password
+GEOCODING_API_KEY=your_geocode_api_key
+AI_API_KEY=your_groq_api_key
 ```
-
-#### Production (`application-prod.properties`)
-```properties
-spring.profiles.active=prod
-spring.jpa.show-sql=false
-spring.jpa.open-in-view=false
-# Environment variables for sensitive data
-```
-
-### **Configurable Properties**
-
-| Property | Default | Purpose |
-|----------|---------|---------|
-| `app.jwt.secret` | — | JWT signing secret |
-| `app.jwt.expiration` | `86400000` | Token lifetime (ms) |
-| `app.geocoding.api-key` | — | Geocoding service API key |
-| `app.cache.ttl` | `300` | Redis cache TTL (seconds) |
-| `server.port` | `8081` | Application port |
 
 ---
 
+## 🔐 Authentication
 
-## 📚 API Documentation
+All protected endpoints require a JWT Bearer token.
 
-### **Interactive Swagger UI**
+**Step 1 — Register**
 ```
-http://localhost:8081/swagger-ui.html
-```
-
-### **OpenAPI JSON Schema**
-```
-http://localhost:8081/api-docs
+POST /api/auth/register
 ```
 
-## 🛠️ Development
+**Step 2 — Copy token from response and use in every request**
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9...
+```
 
-### **Running Tests**
+**Default admin credentials** (seeded by Flyway V4)
+```
+Email:    admin@events.com
+Password: admin123
+```
+
+---
+
+## 📡 API Endpoints (Summary)
+
+| Category | Count | Auth Required |
+|----------|-------|---------------|
+| Authentication | 4 | No |
+| Events (CRUD + Search + Lifecycle) | 12 | Partial |
+| Venues | 7 | Partial |
+| Organizations | 9 | Partial |
+| User Profile | 4 | Yes |
+| Categories | 6 | Partial |
+| Registration | 6 | Yes |
+| Waitlist | 4 | Yes |
+| Reviews & Ratings | 6 | Partial |
+| Bookmarks | 4 | Yes |
+| Notifications | 6 | Yes |
+| Dashboard & Analytics | 3 | Yes |
+| Export | 1 | Yes |
+| Admin | 3 | ADMIN role |
+| AI Recommendations | 1 | Yes |
+| System Health | 2 | No |
+
+> **Total: 88 REST endpoints**
+> Full documentation with request/response examples: [Wiki →](https://github.com/Shubhamkale1/event-manager/wiki)
+
+---
+
+## 🔄 CI/CD Pipeline
+
+```
+Developer pushes code
+        ↓
+GitHub Actions triggers (ci.yml)
+        ↓
+Ubuntu VM spins up
+MySQL + Redis start as service containers
+        ↓
+Java 17 configured
+Maven dependency cache restored
+        ↓
+mvn clean test (full test suite)
+        ↓
+Tests pass? → merge to main
+        ↓
+docker-build.yml triggers
+        ↓
+Tests run again (verify main branch)
+        ↓
+Multi-stage Docker image built
+Tagged: latest, sha-{commit}, main
+        ↓
+Image pushed to Docker Hub
+```
+
+---
+
+## 📊 Monitoring
+
+**Prometheus** scrapes `/actuator/prometheus` every 15 seconds.
+
+**Grafana Dashboard** (auto-provisioned) shows:
+- HTTP Request Rate (requests/sec)
+- HTTP Error Rate (5xx responses/sec)
+- P95 Response Time (95th percentile latency)
+- JVM Heap Memory Usage
+- HikariCP Active Database Connections
+- Request distribution by endpoint and status
+
+---
+
+## 🎯 Key Technical Decisions
+
+| Decision | Choice | Why |
+|----------|--------|-----|
+| Cache | Redis | Eliminates database hits on unchanged data |
+| Search | Elasticsearch | Fuzzy matching impossible with SQL LIKE |
+| Migrations | Flyway | Versioned, trackable schema changes — never ddl-auto=update |
+| Messaging | Kafka | Decouples email delivery from API response time |
+| Auth | Stateless JWT | Scales horizontally — no server-side sessions |
+| Concurrency | Atomic SQL UPDATE | Thread-safe capacity checks without application locks |
+| Mapping | MapStruct | Compile-time generation — zero runtime overhead |
+| Images | Multi-stage Docker | 220MB final image vs 720MB with full JDK |
+
+---
+
+## 🧪 Running Tests
 
 ```bash
-# Run all tests
 mvn test
-
-# Run specific test class
-mvn test -Dtest=EventServiceTest
-
-# Run with coverage
-mvn test jacoco:report
 ```
 
-### **Building for Production**
-
-```bash
-# Build JAR
-mvn clean package -DskipTests
-
-# Run JAR
-java -jar target/event-manager-0.0.1-SNAPSHOT.jar
-```
-
-### **Docker Support** (Phase 5)
-
-```dockerfile
-FROM openjdk:17-jdk-slim
-WORKDIR /app
-COPY target/event-manager-0.0.1-SNAPSHOT.jar app.jar
-EXPOSE 8081
-ENTRYPOINT ["java", "-jar", "app.jar"]
-```
-
-```bash
-docker build -t event-manager:latest .
-docker run -d -p 8081:8081 event-manager:latest
-```
-
----
-
-## 🤝 Contributing
-
-We welcome contributions! Here's how to get started:
-
-### **1. Fork & Clone**
-```bash
-git clone https://github.com/YOUR_USERNAME/Event-Manager.git
-cd Event-Manager
-```
-
-### **2. Create Feature Branch**
-```bash
-git checkout -b feature/amazing-feature
-```
-
-### **3. Make Changes & Commit**
-```bash
-git add .
-git commit -m "Add amazing feature"
-```
-
-### **4. Push to GitHub**
-```bash
-git push origin feature/amazing-feature
-```
-
-### **5. Open Pull Request**
-- Describe changes clearly
-- Link related issues
-- Ensure tests pass
-
-### **Code Standards**
-- Follow [Google Java Style Guide](https://google.github.io/styleguide/javaguide.html)
-- Write unit tests for new features
-- Update README for API changes
-- Keep commits atomic and descriptive
+Tests use real MySQL and Redis (via GitHub Actions services). Elasticsearch is disabled in tests for speed.
 
 ---
 
 ## 📄 License
 
-This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
-
-```
-MIT License
-
-Copyright (c) 2025 Shubham Kale
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-```
+MIT License — Copyright (c) 2026 Shubham Kale
 
 ---
 
-## 📞 Support & Questions
+<div align="center">
 
-- 💬 **Issues**: [GitHub Issues](https://github.com/Shubhamkale1/Event-Manager/issues)
-- 📖 **Wiki**: [Project Wiki](https://github.com/Shubhamkale1/Event-Manager/wiki)
-- 📧 **Email**: [Contact via GitHub](https://github.com/Shubhamkale1)
+Built with the full Spring ecosystem — one real problem at a time.
 
----
+⭐ Star this repo if you found it helpful
 
-## 🙏 Acknowledgments
+**[Shubham Kale](https://github.com/Shubhamkale1)** • Pune, India
 
-- **Spring Boot Team** — Incredible framework
-- **Spring Community** — Great ecosystem
-- **Developers** — Who contribute and provide feedback
-
----
-
-**Happy coding! 🚀**
-
-Made with ❤️ by [Shubham Kale](https://github.com/Shubhamkale1)
+</div>
