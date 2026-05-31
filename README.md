@@ -28,46 +28,26 @@ Every technology was added at the right moment. Redis came when the database was
 
 ---
 
-## 🏗️ Architecture
+## 🎯 Highlights
 
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                        CLIENT (Postman / Web)                        │
-└──────────────────────────┬──────────────────────────────────────────┘
-                           │ HTTPS
-┌──────────────────────────▼──────────────────────────────────────────┐
-│                    SPRING BOOT API (Port 8081)                        │
-│  ┌─────────────┐  ┌─────────────┐  ┌────────────┐  ┌─────────────┐ │
-│  │ Controllers │→ │  Services   │→ │Repositories│→ │   MySQL 8   │ │
-│  │ (REST Layer)│  │(Biz Logic)  │  │(Data Layer)│  │  (Primary)  │ │
-│  └─────────────┘  └──────┬──────┘  └────────────┘  └─────────────┘ │
-│                          │                                           │
-│              ┌───────────┼───────────┐                              │
-│              ▼           ▼           ▼                              │
-│         ┌─────────┐ ┌─────────┐ ┌────────────────┐                 │
-│         │  Redis  │ │  Kafka  │ │ Elasticsearch  │                 │
-│         │ (Cache) │ │(Events) │ │   (Search)     │                 │
-│         └─────────┘ └────┬────┘ └────────────────┘                 │
-└─────────────────────────-│───────────────────────────────────────── ┘
-                           │ Kafka Topics
-              ┌────────────▼────────────┐
-              │    EMAIL MICROSERVICE    │
-              │      (Port 8082)         │
-              │  Kafka Consumer          │
-              │  Sends emails via SMTP   │
-              └─────────────────────────┘
+- 🏗️ Production-Grade Event Management Platform
+- 🔐 JWT Authentication + Google OAuth2 Login
+- ⚡ Redis Distributed Caching for High Performance
+- 🔍 Elasticsearch Full-Text Search with Fuzzy Matching
+- 📨 Apache Kafka Event-Driven Messaging Architecture
+- 🐳 Dockerized Multi-Service Deployment
+- 🚀 CI/CD Pipeline with GitHub Actions
+- 📊 Prometheus & Grafana Monitoring Stack
+- 🧩 Microservices-Based Email Notification Service
+- 🗄️ Flyway Database Version Control & Migrations
+- 🔄 Rate Limiting with Bucket4j
+- 🤖 AI-Powered Event Recommendations using Spring AI
 
-┌─────────────────────────────────────────────────────────────────────┐
-│                      OBSERVABILITY STACK                             │
-│         Prometheus (9090)  →  Grafana Dashboard (3000)              │
-│         Scrapes /actuator/prometheus every 15 seconds               │
-└─────────────────────────────────────────────────────────────────────┘
+## 🏗️ System Architecture
 
-┌─────────────────────────────────────────────────────────────────────┐
-│                         CI/CD PIPELINE                               │
-│   GitHub Push → GitHub Actions → Tests → Docker Build → Docker Hub  │
-└─────────────────────────────────────────────────────────────────────┘
-```
+<p align="center">
+  <img src="docs/architecture.png" alt="Event Management System Architecture" width="1000">
+</p>
 
 ---
 
@@ -154,51 +134,6 @@ Every technology was added at the right moment. Redis came when the database was
 | Containerization | Docker + Compose | 24.x / 2.x |
 | CI/CD | GitHub Actions | — |
 | Build Tool | Maven | 3.x |
-
----
-
-## 📁 Project Structure
-
-```
-event-manager/
-├── src/main/java/com/shubham/event_manager/
-│   ├── config/              # Spring configuration beans
-│   ├── controller/          # REST controllers (17 controllers)
-│   ├── document/            # Elasticsearch documents
-│   ├── dto/                 # API request/response objects
-│   ├── entity/              # JPA database entities
-│   ├── exception/           # Global exception handling
-│   ├── kafka/               # Kafka producers and message DTOs
-│   ├── mapper/              # MapStruct entity↔DTO mappers
-│   ├── repository/          # Spring Data repositories
-│   ├── security/            # JWT, OAuth2, UserDetails
-│   └── service/             # Business logic layer
-│       └── impl/            # Service implementations
-│
-├── src/main/resources/
-│   ├── application.properties
-│   ├── application-dev.properties
-│   ├── application-docker.properties
-│   └── db/migration/        # Flyway V1–V14 migrations
-│
-├── email-service/           # Kafka consumer microservice
-│   └── src/main/java/
-│       └── consumer/EmailKafkaConsumer.java
-│
-├── prometheus/
-│   └── prometheus.yml       # Scrape configuration
-│
-├── grafana/
-│   └── provisioning/        # Auto-configured dashboards
-│
-├── .github/workflows/
-│   ├── ci.yml               # Test pipeline
-│   └── docker-build.yml     # Docker build pipeline
-│
-├── Dockerfile               # Multi-stage Docker build
-├── docker-compose.yml       # Full stack orchestration
-└── pom.xml
-```
 
 ---
 
@@ -290,8 +225,6 @@ GEOCODING_API_KEY=your_geocode_api_key
 AI_API_KEY=your_groq_api_key
 ```
 
----
-
 ## 🔐 Authentication
 
 All protected endpoints require a JWT Bearer token.
@@ -311,8 +244,6 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiJ9...
 Email:    admin@events.com
 Password: admin123
 ```
-
----
 
 ## 📡 API Endpoints (Summary)
 
@@ -412,8 +343,6 @@ mvn test -Dtest=EventServiceTest
 # Run tests and generate an absolute code coverage report
 mvn test jacoco:report
 ```
-
----
 
 ---
 
