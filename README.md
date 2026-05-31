@@ -400,11 +400,71 @@ Image pushed to Docker Hub
 
 ## 🧪 Running Tests
 
+The test suite runs against real MySQL and Redis instances using GitHub Actions service containers. Elasticsearch indexing is bypassed during test phases to maximize build execution speed.
+
 ```bash
-mvn test
+# Run the complete test suite
+mvn clean test
+
+# Run a single targeted test class
+mvn test -Dtest=EventServiceTest
+
+# Run tests and generate an absolute code coverage report
+mvn test jacoco:report
 ```
 
-Tests use real MySQL and Redis (via GitHub Actions services). Elasticsearch is disabled in tests for speed.
+---
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please follow these guidelines to maintain code quality and consistency.
+
+### 1. Fork & Clone
+
+```bash
+git clone https://github.com/YOUR_USERNAME/event-manager.git
+cd event-manager
+```
+
+### 2. Create a Feature Branch
+
+```bash
+git checkout -b feature/your-feature-name
+```
+
+### 3. Make Changes & Commit
+
+- Follow the existing project structure.
+- Write clean, maintainable code.
+- Add unit tests for any new business logic.
+- Use descriptive commit messages.
+
+```bash
+git add .
+git commit -m "Add event waitlist notification feature"
+```
+
+### 4. Push Changes
+
+```bash
+git push origin feature/your-feature-name
+```
+
+### 5. Open a Pull Request
+
+Provide a clear description of:
+- What was changed
+- Why it was changed
+- Any architectural decisions involved
+
+### Coding Standards
+
+- Follow the Google Java Style Guide.
+- Keep commits atomic and meaningful.
+- Ensure all tests pass before submitting.
+- Update documentation when introducing new features.
 
 ---
 
@@ -416,10 +476,8 @@ MIT License — Copyright (c) 2026 Shubham Kale
 
 <div align="center">
 
-Built with the full Spring ecosystem — one real problem at a time.
+⭐ Star this repository if you found it helpful
 
-⭐ Star this repo if you found it helpful
-
-**[Shubham Kale](https://github.com/Shubhamkale1)** • Pune, India
+**Shubham Kale** • Pune, India
 
 </div>
