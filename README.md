@@ -6,7 +6,11 @@
 [![Docker Build](https://img.shields.io/github/actions/workflow/status/Shubhamkale1/event-manager/docker-build.yml?label=Docker%20Build&style=for-the-badge&logo=docker&logoColor=white)](https://github.com/Shubhamkale1/event-manager/actions)
 [![Java](https://img.shields.io/badge/Java-17-ED8B00?style=for-the-badge&logo=java&logoColor=white)](https://www.oracle.com/java/)
 [![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.4.1-6DB33F?style=for-the-badge&logo=spring-boot)](https://spring.io/projects/spring-boot)
+[![Elasticsearch](https://img.shields.io/badge/Elasticsearch-8.x-005571?style=for-the-badge&logo=elasticsearch&logoColor=white)](https://www.elastic.co/elasticsearch)
+[![Redis](https://img.shields.io/badge/Redis-Cache-DC382D?style=for-the-badge&logo=redis&logoColor=white)](https://redis.io/)
 [![Apache Kafka](https://img.shields.io/badge/Apache_Kafka-3.x-231F20?style=for-the-badge&logo=apache-kafka)](https://kafka.apache.org/)
+[![Actuator](https://img.shields.io/badge/Spring_Actuator-Observed-6DB33F?style=for-the-badge&logo=spring-boot&logoColor=white)](https://docs.spring.io/spring-boot/docs/current/reference/html/actuator.html)
+[![Grafana](https://img.shields.io/badge/Grafana-Metrics-F46800?style=for-the-badge&logo=grafana&logoColor=white)](https://grafana.com/)
 [![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=for-the-badge&logo=docker)](https://www.docker.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
 
