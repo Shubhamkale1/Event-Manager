@@ -3,6 +3,8 @@ package com.shubham.event_manager.service;
 import com.shubham.event_manager.dto.RegistrationDTO;
 import com.shubham.event_manager.entity.*;
 import com.shubham.event_manager.exception.ResourceNotFoundException;
+import com.shubham.event_manager.kafka.EventRegisteredMessage;
+import com.shubham.event_manager.kafka.KafkaProducerService;
 import com.shubham.event_manager.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +27,7 @@ public class RegistrationServiceImpl
     private final UserRepository userRepository;
     private final NotificationService notificationService;
     private final WaitlistService waitlistService;
+    private final KafkaProducerService kafkaProducerService;
 
 
     private User getUser(String email) {
@@ -107,6 +110,21 @@ public class RegistrationServiceImpl
         Registration saved =
                 registrationRepository
                         .save(registration);
+
+        EventRegisteredMessage message =
+                new EventRegisteredMessage(
+                        event.getId(),
+                        event.getTitle(),
+                        event.getLocation(),
+                        event.getEventDate(),
+                        user.getEmail(),
+                        user.getName()
+                );
+        kafkaProducerService.publishEventRegistered(message);
+
+        log.info("{} registered for event: {}. " +
+                        "Kafka message published.",
+                userEmail, event.getTitle());
 
         notificationService.notifyRegistrationConfirmed(saved);
 
