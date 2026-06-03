@@ -4,6 +4,8 @@ import com.shubham.event_manager.dto.EventDTO;
 import com.shubham.event_manager.dto.EventLifecycleRequest;
 import com.shubham.event_manager.entity.*;
 import com.shubham.event_manager.exception.ResourceNotFoundException;
+import com.shubham.event_manager.kafka.EventCancelledMessage;
+import com.shubham.event_manager.kafka.KafkaProducerService;
 import com.shubham.event_manager.mapper.EventMapper;
 import com.shubham.event_manager.repository.*;
 import com.shubham.event_manager.service.EventLifecycleService;
@@ -16,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +31,7 @@ public class EventLifecycleServiceImpl
     private final RegistrationRepository registrationRepository;
     private final EventMapper eventMapper;
     private final NotificationService notificationService;
+    private final KafkaProducerService kafkaProducerService;
 
     // ── Helpers ────────────────────────────────────────
 
@@ -105,10 +109,10 @@ public class EventLifecycleServiceImpl
         return eventMapper.toDTO(saved);
     }
 
+
     @Override
     @Transactional
-    @CacheEvict(value = {"events", "event"},
-            allEntries = true)
+    @CacheEvict(value = {"events", "event"}, allEntries = true)
     public EventDTO cancelEvent(
             Long eventId,
             String userEmail,
@@ -118,29 +122,58 @@ public class EventLifecycleServiceImpl
         User user = getUser(userEmail);
 
         checkOwnership(event, user);
-        validateTransition(event,
-                EventStatus.CANCELLED);
+        validateTransition(event, EventStatus.CANCELLED);
 
         event.setStatus(EventStatus.CANCELLED);
         event.setCancelledAt(LocalDateTime.now());
 
         if (request != null
-                && request.getCancellationReason()
-                != null) {
+                && request.getCancellationReason() != null) {
             event.setCancellationReason(
                     request.getCancellationReason());
         }
 
         Event saved = eventRepository.save(event);
 
-        // Notify all registered users
+        // Create in-app notifications (existing)
         notifyRegisteredUsers(saved);
 
-        log.info("Event {} cancelled by {}. Reason: {}",
-                eventId, userEmail,
-                event.getCancellationReason());
+        // Publish to Kafka — Email Service will handle emails
+        publishCancellationToKafka(saved);
+
+        log.info("Event {} cancelled by {}. Kafka message published.",
+                eventId, userEmail);
 
         return eventMapper.toDTO(saved);
+    }
+
+    private void publishCancellationToKafka(Event event) {
+        // Collect all registered user emails
+        List<String> emails = registrationRepository
+                .findByEventOrderByRegisteredAtAsc(event)
+                .stream()
+                .filter(r -> r.getStatus()
+                        == RegistrationStatus.CONFIRMED)
+                .map(r -> r.getUser().getEmail())
+                .collect(Collectors.toList());
+
+        EventCancelledMessage message =
+                new EventCancelledMessage(
+                        event.getId(),
+                        event.getTitle(),
+                        event.getCancellationReason(),
+                        event.getCancelledAt(),
+                        emails
+                );
+
+        kafkaProducerService
+                .publishEventCancelled(message);
+
+        log.info(
+                "Published cancellation to Kafka for event={}" +
+                        " with {} registered users",
+                event.getId(), emails.size()
+        );
     }
 
     @Override
